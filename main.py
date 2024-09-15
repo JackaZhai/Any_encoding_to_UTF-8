@@ -47,7 +47,7 @@ root = tk.Tk()
 root.title("编码转换器")
 
 # 创建一个标签
-label = tk.Label(root, text="请选择要转换的文件夹：")
+label = tk.Label(root, text="请选择要转换的文件后缀名后，选择要转换的文件夹：")
 label.pack(pady=10)
 
 # 文件类型选择
