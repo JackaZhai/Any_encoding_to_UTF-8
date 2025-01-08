@@ -10,7 +10,7 @@ def detect_encoding(file_path):
         result = chardet.detect(raw_data)
         return result['encoding']
 
-def convert_to_utf8(file_path, log_widget):
+def convert_to_target_encoding(file_path, target_encoding, log_widget):
     try:
         # 检测文件编码
         encoding = detect_encoding(file_path)
@@ -21,43 +21,51 @@ def convert_to_utf8(file_path, log_widget):
         with open(file_path, 'r', encoding=encoding) as file:
             content = file.read()
 
-        # 将文件内容写回为 UTF-8 编码
-        with open(file_path, 'w', encoding='utf-8') as file:
+        # 将文件内容写回为目标编码
+        with open(file_path, 'w', encoding=target_encoding) as file:
             file.write(content)
 
         log_widget.insert(tk.END, f"Converted: {file_path}\n")
     except Exception as e:
         log_widget.insert(tk.END, f"Failed to convert {file_path}: {e}\n")
 
-def batch_convert(folder_path, file_extensions, log_widget):
+def batch_convert(folder_path, file_extensions, target_encoding, log_widget):
     for root1, dirs, files in os.walk(folder_path):
         for file_name in files:
             if any(file_name.endswith(ext) for ext in file_extensions):
                 file_path = os.path.join(root1, file_name)
-                convert_to_utf8(file_path, log_widget)
-    messagebox.showinfo("完成", "所有文件已成功转换为 UTF-8！")
+                convert_to_target_encoding(file_path, target_encoding, log_widget)
+    messagebox.showinfo("完成", f"所有文件已成功转换为 {target_encoding} 编码！")
 
 def select_folder():
     folder_path = filedialog.askdirectory()
     if folder_path:
         log_widget.delete(1.0, tk.END)  # 清空日志
-        batch_convert(folder_path, selected_extensions.get().split(','), log_widget)
+        batch_convert(folder_path, selected_extensions.get().split(','), selected_encoding.get(), log_widget)
 
 # 创建主窗口
 root = tk.Tk()
 root.title("编码转换器")
 
 # 创建一个标签
-label = tk.Label(root, text="请选择要转换的文件类型和文件夹：")
+label = tk.Label(root, text="请选择要转换的文件类型、目标编码和文件夹：")
 label.pack(pady=10)
 
 # 文件类型选择
-file_types = ['.cpp', '.c', '.py', '.java']
+file_types = ['.cpp', '.c', '.py', '.java', '.h']
 selected_extensions = tk.StringVar(root)
 selected_extensions.set(file_types[0])  # 设置默认文件类型
 
 file_type_menu = tk.OptionMenu(root, selected_extensions, *file_types)
 file_type_menu.pack(pady=10)
+
+# 编码选择
+encodings = ['utf-8', 'utf-16', 'latin-1', 'ascii', 'GB2312']
+selected_encoding = tk.StringVar(root)
+selected_encoding.set(encodings[0])  # 设置默认编码
+
+encoding_menu = tk.OptionMenu(root, selected_encoding, *encodings)
+encoding_menu.pack(pady=10)
 
 # 创建一个按钮来选择文件夹
 select_button = tk.Button(root, text="选择文件夹", command=select_folder)
